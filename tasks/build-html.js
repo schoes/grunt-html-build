@@ -202,7 +202,7 @@ module.exports = function (grunt) {
         }
         else {
             var destDir = options.relative && isFileRegex.test(options.dest) ? path.dirname(options.dest) : options.dest;
-            
+
             return options.files.map(function (f) {
                 var url = options.relative ? path.relative(destDir, f) : f;
                 url = url.replace(/\\/g, '/');
@@ -290,6 +290,7 @@ module.exports = function (grunt) {
         tags.forEach(function (tag) {
             var raw = tag.lines.join(EOL),
                 result = "",
+                allWhitespaces = /\s/g,
                 tagFiles = validators.validate(tag, params);
 
             if (tagFiles) {
@@ -320,6 +321,8 @@ module.exports = function (grunt) {
                 grunt.fail.warn("Tag with type '" + tag.type + "' and name: '" + tag.name + "' is not configured in your Gruntfile.js !");
             }
 
+            content = content.replace(allWhitespaces,"");
+            raw = raw.replace(allWhitespaces,"");
             content = content.replace(raw, function () { return result });
         });
 
