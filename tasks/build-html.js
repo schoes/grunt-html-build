@@ -39,7 +39,7 @@ module.exports = function (grunt) {
             html: beautifier.html
         },
 
-        // Tags Regular Expressions
+    // Tags Regular Expressions
         regexTagStartTemplate = "<!--\\s*%parseTag%:(\\w+)\\s*(inline)?\\s*(optional)?\\s*(recursive)?\\s*(noprocess)?\\s*([^\\s]*)\\s*(?:\\[(.*)\\])?\\s*-->", // <!-- build:{type} (inline) (optional) (recursive) {name} [attributes...] --> {} required () optional
         regexTagEndTemplate = "<!--\\s*\\/%parseTag%\\s*-->", // <!-- /build -->
         regexTagStart = "",
@@ -88,6 +88,7 @@ module.exports = function (grunt) {
 
         return tags;
     }
+
     function defaultProcessPath(pathes, params, opt) { //takes an array of paths and validates them
         var local = grunt.file.expand(opt, pathes),
             flattenPaths = _.isArray(pathes) ? _.flattenDeep(pathes) : pathes,
@@ -96,11 +97,14 @@ module.exports = function (grunt) {
             });
 
         if (params.relative && opt.cwd) {
-            local = local.map(function (src) { return path.join(opt.cwd, src); });
+            local = local.map(function (src) {
+                return path.join(opt.cwd, src);
+            });
         }
 
         return _.uniq(local.concat(remote));
     }
+
     function validateBlockWithName(tag, params) {
         var src = params[tag.type + "s"],
 
@@ -133,13 +137,18 @@ module.exports = function (grunt) {
             return params.processPath(files, params, opt);
         }
     }
+
     function validateBlockAlways(tag) {
         return true;
     }
 
     function setTagRegexes(parseTag) {
-        regexTagStart = regexTagStartTemplate.replace(/%parseTag%/, function () { return parseTag });
-        regexTagEnd = regexTagEndTemplate.replace(/%parseTag%/, function () { return parseTag });
+        regexTagStart = regexTagStartTemplate.replace(/%parseTag%/, function () {
+            return parseTag
+        });
+        regexTagEnd = regexTagEndTemplate.replace(/%parseTag%/, function () {
+            return parseTag
+        });
     }
 
     //#endregion
@@ -161,9 +170,11 @@ module.exports = function (grunt) {
             data: _.extend({}, options.data, extend)
         };
     }
+
     function processTemplate(template, options, src, attrs) {
         return grunt.template.process(template, createTemplateData(options, src, attrs));
     }
+
     function createAttributes(options, src) {
         var attrs = options.attributes || "";
 
@@ -181,14 +192,15 @@ module.exports = function (grunt) {
 
         return attrs.trim();
     }
+
     function processHtmlTagTemplate(options, src) {
         var template = templates[options.type + (options.inline ? "-inline" : "")],
             attrs = createAttributes(options, src);
 
         if (!options.inline || options.noprocess) {
             return template
-                    .replace("<%= src %>", src)
-                    .replace("<%= attributes %>", attrs);
+                .replace("<%= src %>", src)
+                .replace("<%= attributes %>", attrs);
         }
         else {
             return processTemplate(template, options, src, attrs);
@@ -259,10 +271,12 @@ module.exports = function (grunt) {
 
             process: function (options) {
                 return options.lines
-                                .map(function (l) { return processTemplate(l, options); })
-                                .join(EOL)
-                                .replace(new RegExp(regexTagStart), "")
-                                .replace(new RegExp(regexTagEnd), "");
+                    .map(function (l) {
+                        return processTemplate(l, options);
+                    })
+                    .join(EOL)
+                    .replace(new RegExp(regexTagStart), "")
+                    .replace(new RegExp(regexTagEnd), "");
             },
             remove: function (options) {
                 if (!options.name) return "";
@@ -283,14 +297,22 @@ module.exports = function (grunt) {
 
     //#endregion
 
+    function detectLineEnding(line) {
+        if (line.indexOf('\r\n') !== -1) {
+            return '\r\n';
+        }
+        else {
+            return '\n';
+        }
+    }
+
     function transformContent(content, params, dest) {
         var tags = getBuildTags(content),
             config = grunt.config();
 
         tags.forEach(function (tag) {
-            var raw = tag.lines.join(EOL),
+            var raw = tag.lines.join(detectLineEnding(tag.lines[0])),
                 result = "",
-                allWhitespaces = /\s/g,
                 tagFiles = validators.validate(tag, params);
 
             if (tagFiles) {
@@ -321,9 +343,9 @@ module.exports = function (grunt) {
                 grunt.fail.warn("Tag with type '" + tag.type + "' and name: '" + tag.name + "' is not configured in your Gruntfile.js !");
             }
 
-            content = content.replace(allWhitespaces,"");
-            raw = raw.replace(allWhitespaces,"");
-            content = content.replace(raw, function () { return result });
+            content = content.replace(raw, function () {
+                return result
+            });
         });
 
         if (params.beautify) {
