@@ -291,7 +291,7 @@ module.exports = function (grunt) {
             },
             append: function (options) {
                 if (!options.name) return "";
-
+                var targets = options.name.split(",");
                 if (targets.indexOf(grunt.task.current.target) > 0) {
                     return options.lines.join(EOL).replace(new RegExp(regexTagStart), "").replace(new RegExp(regexTagEnd), "");
                 }

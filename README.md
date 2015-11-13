@@ -85,6 +85,9 @@ Using the configuration above, consider the following example html to see it in 
     <!-- build:remove -->
     <script type="text/javascript" src="/path/to/js/only-dev.js"></script>
     <!-- /build -->
+    <!--build:append test-->
+    <script type="text/javascript" src="/path/to/js/only-test.js"></script>
+    <!--/build-->
     
     <!-- build:remove dev -->
     <script type="text/javascript" src="/path/analytics.js"></script>
